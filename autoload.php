@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-include('../log4php/Logger.php');
+include_once('../log4php/Logger.php');
 Logger::configure('config.xml');
 
 spl_autoload_register(function ($class_name) {

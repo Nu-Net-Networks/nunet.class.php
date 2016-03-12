@@ -8,7 +8,7 @@
     </appender>
  
     <root>
-        <priority value="TRACE"/>
+        <priority value="TRACE" />
         <appender-ref ref="RollingAppender" />
     </root>
 </configuration>
