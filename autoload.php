@@ -7,7 +7,7 @@
  */
 
 include_once('../log4php/Logger.php');
-Logger::configure('config.xml');
+
 
 spl_autoload_register(function ($class_name) {
     if (file_exists($class_name . '.class.php')) {
