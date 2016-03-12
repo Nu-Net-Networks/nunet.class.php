@@ -27,44 +27,36 @@ class sql {
     }
 
     public function connect($servername = "localhost", $username = "username", $password = "password") {
+        $this->db = new PDO("mysql:host=$servername;dbname=TBS;", $username, $password, array(PDO::ATTR_EMULATE_PREPARES => false, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+        return $this->db;
+    }
 
-// Create connection
-        $this->db = new mysqli($servername, $username, $password);
+    public function checkPass($username, $password) {
+        $sth = $this->db->prepare('SELECT Pass FROM Users WHERE UserName = :username LIMIT 1');
 
-// Check connection
-        if ($this->db->connect_error) {
-            $this->log->error("Connection failed: " . $this->db->connect_error);
+        $sth->bindParam(':username', $username);
+
+        $sth->execute();
+
+        $user = $sth->fetch(PDO::FETCH_OBJ);
+        $hash = crypt($password . $username, $user->Pass);
+        echo $user->Pass . "\n<br />$hash\n<br />";
+// Hashing the password with its hash as the salt returns the same hash
+        if ($this->hash_equals($user->Pass, $hash)) {
+            return TRUE;
         } else {
-            $this->log->trace("Connected successfully");
+            return FALSE;
         }
     }
 
-    public function createSql($tableName, $dataArray) {
-        $this->log->debug("$tableName - " . json_encode($dataArray));
-        $this->connected = @mysqli_ping($this->db) ? true : false;
-        $colString = '';
-        $valueString = '';
-        if ($this->connected) {
-            $this->log->debug("Connected will use mysql_real_escape_string");
-        } else {
-            $this->log->warn("Not Connected to a database the escaping of char will not be as secure");
-        }
-        foreach ($dataArray as $key => $value) {
-            $colString .= "`$key`,";
-            if ($this->connected) { // This will not work if there is no db connection but is safer
-                $valueString .= "'" . mysqli_real_escape_string($this->db, $value) . "',";
-            } else { // This will work if there is no db connection
-                $search = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
-                $replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
-                $value = str_replace($search, $replace, $value);
-                $valueString .= "'" . $value . "',";
-            }
-        }
-        $colString = rtrim($colString, ",");
-        $valueString = rtrim($valueString, ",");
-        $sql = "INSERT INTO `$tableName` ($colString) VALUES ($valueString)";
-        $this->log->debug($sql);
-        return $sql;
+  private function hash_equals($str1, $str2) {
+    if(strlen($str1) != strlen($str2)) {
+      return false;
+    } else {
+      $res = $str1 ^ $str2;
+      $ret = 0;
+      for($i = strlen($res) - 1; $i >= 0; $i--) $ret |= ord($res[$i]);
+      return !$ret;
     }
-
+  }
 }
