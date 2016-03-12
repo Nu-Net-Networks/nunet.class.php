@@ -1,0 +1,14 @@
+<configuration xmlns="http://logging.apache.org/log4php/">
+    <appender name="RollingAppender" class="LoggerAppenderDailyFile">
+        <param name="file" value="%s-nunet.class.log" />
+        <param name="datePattern" value="Y-m-d-H" />
+        <layout class="LoggerLayoutPattern">
+            <param name="conversionPattern" value="%date [%logger] -%level- %message%newline" />          
+        </layout>
+    </appender>
+ 
+    <root>
+        <priority value="TRACE"/>
+        <appender-ref ref="RollingAppender" />
+    </root>
+</configuration>
